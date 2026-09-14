@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build and compiler caches
+build/
+dist/
+*.egg-info/
+.cache/
+triton_cache/
+torch_extensions/
+
+# Environment and credentials
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# IDE and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
+
+# Large benchmark artifacts
+*.npy
+*.npz
+*.pt
+*.pth
