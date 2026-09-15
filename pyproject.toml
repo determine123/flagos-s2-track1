@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dsv3-fused-a-gemm"
+version = "0.1.0"
+description = "Triton kernel for the DeepSeek-V3 fused MLA A projection GEMM (q_a_proj + kv_a_proj_with_mqa)"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "torch>=2.1",
+]
+
+[project.optional-dependencies]
+kernel = ["triton>=3.0"]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# tests/conftest.py puts src/ on sys.path, so the package imports without an
+# editable install (useful on machines where the package cannot be installed).
+addopts = "-ra"
+markers = [
+    "gpu: requires a CUDA device",
+    # Optional project extension: a contiguous [K, N] mat_b. NOT a competition
+    # requirement -- the competition always passes the column-major transposed
+    # view with strides (1, K). Run the main path alone with:
+    #   pytest -m "not extension"
+    "extension: contiguous-layout extension case, not required by the competition",
+]

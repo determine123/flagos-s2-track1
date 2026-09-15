@@ -44,3 +44,14 @@ temp/
 *.npz
 *.pt
 *.pth
+# Local credentials and generated artifacts
+.env
+.env.*
+.claude/
+.vscode/
+__pycache__/
+*.pyc
+*.bench.json
+*.egg-info/
+dist/
+.pytest_cache/
