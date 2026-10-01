@@ -89,7 +89,7 @@ python benchmarks/bench_dsv3_fused_a_gemm.py --sweep --no-flush-l2
 
 ## 团队与来源
 
-团队determine：李天明、xtty、5678_apix8yk、Wzp、8523_apiwmre。
+团队determine：determine、xtty、5678_apix8yk、Wzp、8523_apiwmre。
 初版由KernelGen Web生成，AI工具辅助审查、集成与实验；
 个人贡献以实际PR和实验记录为准。本次为事后归档，不伪造历史开发时间。
 
