@@ -22,4 +22,6 @@ torch_contig的B预先转换，其数据不含转换成本。FP32 oracle与BF16�
 python scripts/package_submission.py --output dist/task66-best.zip
 
 默认打包submissions/task66_perf_test_02五个源码；固定ZIP元数据，旁边生成manifest。
-ZIP哈希可能与历史打包工具不同，但源码必须相同。脚本不证明设备执行或反作弊合规。
+ZIP哈希可能与历史打包工具不同，但源码必须相同。打包器会静态拒绝公开签名缺失、
+异常处理、相对导入及常见Torch矩阵计算写法，但这是有限的源码检查，不能证明设备执行、
+别名/动态调用等场景的合规性，仍需按赛事规则人工复核。

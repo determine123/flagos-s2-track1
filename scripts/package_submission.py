@@ -3,8 +3,8 @@ import argparse
 import ast
 import hashlib
 import json
-from pathlib import Path
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {
@@ -14,6 +14,22 @@ EXPECTED = {
     "dsv3_fused_a_gemm_hygon.py",
     "dsv3_fused_a_gemm_ascend.py",
 }
+REQUIRED_FUNCTIONS = ("dsv3_fused_a_gemm", "reference")
+FORBIDDEN_TORCH_CALLS = {
+    "torch.matmul",
+    "torch.mm",
+    "torch.bmm",
+    "torch.addmm",
+    "torch.einsum",
+    "torch.nn.functional.linear",
+    "torch.ops.aten.matmul",
+    "torch.ops.aten.mm",
+    "torch.ops.aten.bmm",
+    "torch.ops.aten.addmm",
+    "torch.ops.aten.einsum",
+    "operator.matmul",
+}
+FORBIDDEN_MATMUL_METHODS = {"matmul", "mm", "bmm", "addmm", "einsum"}
 
 def validate(source):
     paths = sorted(source.iterdir())
@@ -26,7 +42,9 @@ def validate(source):
         raw = path.read_bytes()
         tree = ast.parse(raw.decode("utf-8"), filename=path.name)
         functions = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
-        for name in ("dsv3_fused_a_gemm", "reference"):
+        for name in REQUIRED_FUNCTIONS:
+            if name not in functions:
+                raise ValueError(f"{path.name}: missing required function {name}")
             args = functions[name].args
             if ([a.arg for a in args.args] != ["mat_a", "mat_b"]
                     or args.posonlyargs or args.kwonlyargs or args.vararg
@@ -40,10 +58,17 @@ def validate(source):
                 raise ValueError("Relative import in standalone source")
             if isinstance(node, ast.Try):
                 raise ValueError("Unexpected exception handler")
-            if isinstance(node, ast.Call) and ast.unparse(node.func) in {
-                "torch.matmul", "torch.mm", "torch.bmm", "torch.addmm"
-            }:
-                raise ValueError("Torch computation in submission")
+            if isinstance(node, ast.BinOp) and isinstance(node.op, ast.MatMult):
+                raise ValueError("Torch matrix computation in submission")
+            if isinstance(node, ast.Call):
+                called = ast.unparse(node.func)
+                if called in FORBIDDEN_TORCH_CALLS:
+                    raise ValueError("Torch matrix computation in submission")
+                if (
+                    isinstance(node.func, ast.Attribute)
+                    and node.func.attr in FORBIDDEN_MATMUL_METHODS
+                ):
+                    raise ValueError("Torch matrix computation in submission")
         payload[path.name] = raw
     return payload
 
